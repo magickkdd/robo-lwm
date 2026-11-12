@@ -30,8 +30,9 @@ class TrialCapExceeded(RuntimeError):
 class LiberoEnv:
     """One task, one trial budget, one video per trial."""
 
-    def __init__(self, suite=None, task_id=None, camera_size=None, fps=20, horizon=520):
+    def __init__(self, suite=None, task_id=None, camera_size=None, fps=20, horizon=520, preview=False):
         self.suite = suite or os.environ.get("ROBOLWM_SUITE", "libero_object")
+        self.preview = preview
         self.task_id = int(task_id if task_id is not None else os.environ.get("ROBOLWM_TASK_ID", "0"))
         self.camera_size = int(camera_size or os.environ.get("ROBOLWM_CAMERA", "256"))
         self.fps = fps
@@ -92,7 +93,19 @@ class LiberoEnv:
         return env
 
     def reset(self):
-        """Start a new trial. Consumes one try from the budget."""
+        """Start a new trial. Consumes one try from the budget.
+
+        In preview mode this only captures the initial observation: no trial is
+        consumed, no artifacts are written, and ``step`` is disabled.
+        """
+        if self.preview:
+            if self._env is None:
+                self._env = self._make_env()
+            self._env.reset()
+            obs = self._env.set_init_state(self._init_states[0])
+            self._last_obs = obs
+            return self.describe()
+
         state = self._read_state()
         if state["tries"] >= self.try_cap:
             raise TrialCapExceeded(f"trial cap reached: {state['tries']}/{self.try_cap}")
@@ -119,6 +132,8 @@ class LiberoEnv:
 
     def step(self, action):
         """Apply one absolute 7-D end-effector pose; the wrapper converts to OSC deltas."""
+        if self.preview:
+            raise RuntimeError("preview mode is read-only; call reset() without preview to execute")
         if self._env is None:
             raise RuntimeError("call reset() before step()")
         arr = np.asarray(action, dtype=np.float64).reshape(-1)
@@ -170,8 +185,8 @@ class LiberoEnv:
             "suite": self.suite,
             "task_id": self.task_id,
             "try": self._try_index,
-            "tries_used": self.num_tries,
-            "tries_left": self.remaining_tries,
+            "tries_used": 0 if self.preview else self.num_tries,
+            "tries_left": self.try_cap if self.preview else self.remaining_tries,
             "eef_pos": np.asarray(obs.get("robot0_eef_pos", [])).round(4).tolist(),
             "eef_quat": np.asarray(obs.get("robot0_eef_quat", [])).round(4).tolist(),
             "gripper_qpos": np.asarray(obs.get("robot0_gripper_qpos", [])).round(4).tolist(),
@@ -193,6 +208,13 @@ class LiberoEnv:
         if self._closed:
             return
         self._closed = True
+        if self.preview:
+            if self._env is not None:
+                try:
+                    self._env.close()
+                except Exception:
+                    pass
+            return
         if self._try_index is None:
             return
 

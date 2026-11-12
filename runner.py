@@ -57,6 +57,56 @@ def write_json(path: Path, data: dict) -> None:
     os.replace(tmp, path)
 
 
+def initial_obs(suite: str, task_id: int) -> dict:
+    """Capture the initial observation without consuming a trial."""
+    code = """
+import json, os
+os.environ.setdefault("MUJOCO_GL", "osmesa")
+os.environ.setdefault("PYOPENGL_PLATFORM", "osmesa")
+from libero_env import LiberoEnv
+env = LiberoEnv(preview=True)
+obs = env.reset()
+print("OBS:" + json.dumps(obs))
+env.close()
+"""
+    env = dict(os.environ)
+    env["LIBERO_CONFIG_PATH"] = LIBERO_CONFIG_PATH
+    env["MUJOCO_GL"] = "osmesa"
+    env["PYOPENGL_PLATFORM"] = "osmesa"
+    env["ROBOLWM_SUITE"] = suite
+    env["ROBOLWM_TASK_ID"] = str(task_id)
+    env["PYTHONPATH"] = os.pathsep.join(
+        p for p in (str(SIM), env.get("PYTHONPATH", "")) if p
+    )
+    try:
+        out = subprocess.check_output(
+            [LIBERO_PYTHON, "-c", code],
+            env=env,
+            text=True,
+            stderr=subprocess.DEVNULL,
+            cwd=str(ROOT),
+            timeout=180,
+        )
+    except (subprocess.SubprocessError, OSError) as e:
+        print(f"[warn] could not capture initial observation: {e}")
+        return {}
+    for line in out.splitlines():
+        if line.startswith("OBS:"):
+            try:
+                return json.loads(line[4:])
+            except json.JSONDecodeError:
+                break
+    print("[warn] initial observation was not present in preview output")
+    return {}
+
+
+def count_lwm_reviews(artifacts: Path) -> int:
+    path = artifacts / "lwm" / "reviews.jsonl"
+    if not path.is_file():
+        return 0
+    return sum(1 for line in path.read_text(encoding="utf-8").splitlines() if line.strip())
+
+
 def prepare_workspace(task_dir: Path, suite: str, task_id: int, language: str) -> Path:
     workspace = task_dir / "workspace"
     workspace.mkdir(parents=True, exist_ok=True)
@@ -101,6 +151,10 @@ def run_task(args, suite: str, task_id: int, meta: dict) -> dict:
     workspace = prepare_workspace(task_dir, suite, task_id, meta["language"])
     artifacts = task_dir / "artifacts"
     artifacts.mkdir(parents=True, exist_ok=True)
+    obs = initial_obs(suite, task_id)
+    if obs:
+        write_json(artifacts / "init_obs.json", obs)
+        write_json(workspace / "obs.json", obs)
     prompt = meta["language"]
     (task_dir / "prompt.txt").write_text(prompt, encoding="utf-8")
 
@@ -113,6 +167,7 @@ def run_task(args, suite: str, task_id: int, meta: dict) -> dict:
             "suite": suite,
             "task_id": task_id,
             "task": meta["language"],
+            "lwm": args.lwm,
             "started": started,
         },
     )
@@ -133,6 +188,8 @@ def run_task(args, suite: str, task_id: int, meta: dict) -> dict:
         suite=suite,
         task_id=task_id,
         sim_path=str(SIM),
+        task_language=meta["language"],
+        lwm_enabled=args.lwm,
         python=LIBERO_PYTHON,
         libero_config_path=LIBERO_CONFIG_PATH,
         try_cap=args.try_cap,
@@ -170,6 +227,7 @@ def run_task(args, suite: str, task_id: int, meta: dict) -> dict:
                 "api_calls": agent.n_calls,
                 "cost": round(agent.cost, 6),
                 "tries": len(tries),
+                "lwm_reviews": count_lwm_reviews(artifacts),
                 "steps_last_try": best.get("steps"),
                 "video": best.get("video") if success else None,
                 "duration_s": round(time.time() - started, 1),
@@ -204,6 +262,7 @@ def parse_args():
     p.add_argument("--model", default=None)
     p.add_argument("--reasoning-effort", default=os.environ.get("REASONING_EFFORT", "none"))
     p.add_argument("--request-timeout", type=float, default=180.0)
+    p.add_argument("--lwm", action="store_true", help="let the agent query the language world model")
     p.add_argument("--force", action="store_true")
     return p.parse_args()
 

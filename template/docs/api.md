@@ -61,6 +61,13 @@ Returns the task's native success predicate.
 
 Remaining and consumed trial budget.
 
+### Submission
+
+`echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT` is accepted **only after at least
+one trial has succeeded**. If no trial has succeeded, the submission is ignored
+and the run keeps going. When the trial budget is exhausted without success,
+the run ends as a failure.
+
 ## Observation schema
 
 `obs` is a dictionary:

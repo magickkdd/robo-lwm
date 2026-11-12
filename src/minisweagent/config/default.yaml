@@ -26,14 +26,17 @@ agent:
 
     ## Read first
 
-    1. `README.md` — task assignment and required outputs.
-    2. `docs/api.md` — the complete `LiberoEnv` contract: action format,
+    1. `obs.json` — the initial observation: end-effector pose, gripper state,
+       and object poses. Reading it does not consume a trial.
+    2. `README.md` — task assignment and required outputs.
+    3. `docs/api.md` — the complete `LiberoEnv` contract: action format,
        observation schema, trial budget.
-    3. `example_episode.py` — a skeleton you can adapt.
+    4. `example_episode.py` — a skeleton you can adapt.
 
     ## Workflow
 
-    1. Inspect the scene: object names and positions are in `obs["objects"]`.
+    1. Inspect the scene in `obs.json` (object names and positions are in
+       `objects`).
     2. Write `episode.py`: reset, read object poses, move the end effector
        through a pick-and-place sequence, check success.
     3. Run `python episode.py` and read the printed JSON summary.
@@ -42,6 +45,20 @@ agent:
     5. When the task succeeds, submit with:
 
        `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`
+
+    {% if lwm_enabled %}
+    ## World model review
+
+    Before running `episode.py`, ask the language world model to predict whether
+    the plan will work:
+
+    `python -m lwm.cli --episode episode.py`
+
+    If it predicts `failure` with confidence >= 0.6, revise `episode.py` before
+    spending a trial. The review is advisory: it cannot execute code and it
+    never replaces actually running the episode. If it is unavailable, continue
+    normally.
+    {% endif %}
 
     ## Rules
 

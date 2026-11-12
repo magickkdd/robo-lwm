@@ -13,6 +13,12 @@ through the `LiberoEnv` wrapper described in `docs/api.md`.
 
 - `episode.py` — must run to completion with `python episode.py`
 
+## Initial observation
+
+`obs.json` contains the initial observation: end-effector pose, gripper state,
+and the pose of every object. It was captured without consuming a trial, so you
+can use it to plan before writing or running `episode.py`.
+
 ## Rules
 
 - Only interact with the simulator through `LiberoEnv`. Never import mujoco or
@@ -21,6 +27,9 @@ through the `LiberoEnv` wrapper described in `docs/api.md`.
   workspace.
 - Every `env.reset()` consumes one trial. The trial budget is limited; check
   `env.tries_left` before spending one.
+- Submission is accepted only after a successful trial. If no trial has
+  succeeded yet, the submission is ignored and you must keep iterating; when
+  the trial budget is exhausted, the run ends as a failure.
 - Start from `example_episode.py`, but do not assume it solves your task.
 - When you are done, submit with exactly:
 

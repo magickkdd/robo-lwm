@@ -11,7 +11,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from minisweagent.exceptions import Submitted
+from minisweagent.exceptions import LimitsExceeded, Submitted
 
 
 class RobotEnvironmentConfig(BaseModel):
@@ -20,6 +20,8 @@ class RobotEnvironmentConfig(BaseModel):
     suite: str
     task_id: int
     sim_path: str
+    task_language: str = ""
+    lwm_enabled: bool = False
     python: str = "/home/czx/miniconda3/envs/libero/bin/python"
     libero_config_path: str = "/home/czx/.libero-roboclwm"
     try_cap: int = 10
@@ -51,15 +53,22 @@ class RobotEnvironment:
 
     def _child_env(self) -> dict[str, str]:
         env = dict(os.environ)
+        project_root = str(Path(self.config.sim_path).resolve().parent)
+        python_path = os.pathsep.join(
+            p for p in (self.config.sim_path, project_root, env.get("PYTHONPATH", "")) if p
+        )
         env.update(
             {
-                "PYTHONPATH": self.config.sim_path + os.pathsep + env.get("PYTHONPATH", ""),
+                "PYTHONPATH": python_path,
                 "PYTHONUNBUFFERED": "1",
                 "LIBERO_CONFIG_PATH": self.config.libero_config_path,
                 "MUJOCO_GL": "osmesa",
                 "PYOPENGL_PLATFORM": "osmesa",
                 "ROBOLWM_ARTIFACTS": str(self.artifacts),
                 "ROBOLWM_STATE": str(self.artifacts / "state.json"),
+                "ROBOLWM_INIT_OBS": str(self.artifacts / "init_obs.json"),
+                "ROBOLWM_TASK": self.config.task_language,
+                "ROBOLWM_LWM": "on" if self.config.lwm_enabled else "off",
                 "ROBOLWM_SUITE": self.config.suite,
                 "ROBOLWM_TASK_ID": str(self.config.task_id),
                 "ROBOLWM_TRY_CAP": str(self.config.try_cap),
@@ -108,29 +117,71 @@ class RobotEnvironment:
         self._check_finished(result)
         return result
 
-    def _check_finished(self, result: dict) -> None:
-        """Raise Submitted when the agent emits the completion sentinel.
+    def _try_results(self) -> list[dict]:
+        results = []
+        for path in sorted(self.artifacts.glob("tries/*/result.json")):
+            try:
+                results.append(json.loads(path.read_text()))
+            except (OSError, json.JSONDecodeError):
+                continue
+        return results
 
-        Accepts the sentinel either on the first line (submission follows) or on
-        the last line (chained after the final command).
+    def _tries_used(self) -> int:
+        state_path = self.artifacts / "state.json"
+        if state_path.is_file():
+            try:
+                return int(json.loads(state_path.read_text()).get("tries", 0))
+            except (OSError, ValueError, json.JSONDecodeError):
+                pass
+        return len(self._try_results())
+
+    def _check_finished(self, result: dict) -> None:
+        """Handle the completion sentinel under an external success gate.
+
+        Submission is accepted only if at least one recorded trial succeeded.
+        Otherwise it is rejected (and the agent keeps working) until the trial
+        budget is exhausted, at which point the run ends as a failure.
         """
         lines = result.get("output", "").lstrip().splitlines(keepends=True)
         if not lines or result["returncode"] != 0:
             return
         sentinel = "COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT"
-        if lines[0].strip() == sentinel:
-            submission = "".join(lines[1:])
-        elif lines[-1].strip() == sentinel:
-            submission = ""
-        else:
+        first, last = lines[0].strip(), lines[-1].strip()
+        if first != sentinel and last != sentinel:
             return
-        raise Submitted(
-            {
-                "role": "exit",
-                "content": submission,
-                "extra": {"exit_status": "Submitted", "submission": submission},
-            }
+
+        results = self._try_results()
+        if any(r.get("success") for r in results):
+            submission = "" if last == sentinel else "".join(lines[1:])
+            raise Submitted(
+                {
+                    "role": "exit",
+                    "content": submission,
+                    "extra": {"exit_status": "Submitted", "submission": submission},
+                }
+            )
+
+        used = self._tries_used()
+        if used >= self.config.try_cap:
+            raise LimitsExceeded(
+                {
+                    "role": "exit",
+                    "content": "TrialBudgetExhausted",
+                    "extra": {
+                        "exit_status": "TrialBudgetExhausted",
+                        "submission": "",
+                        "tries": used,
+                    },
+                }
+            )
+
+        result["output"] = result.get("output", "") + (
+            "\n<submission_rejected>\n"
+            f"No successful trial yet ({used}/{self.config.try_cap} tries used). "
+            "Submission ignored. Fix episode.py and run it again.\n"
+            "</submission_rejected>\n"
         )
+        result.setdefault("extra", {})["submission_rejected"] = True
 
     def _log_call(self, command: str, result: dict, duration: float) -> None:
         entry = {
@@ -150,6 +201,7 @@ class RobotEnvironment:
             "suite": self.config.suite,
             "task_id": self.config.task_id,
             "python": self.config.python,
+            "lwm_enabled": self.config.lwm_enabled,
         }
 
     def serialize(self) -> dict:
