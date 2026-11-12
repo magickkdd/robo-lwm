@@ -1,0 +1,9 @@
+{
+  "success": false,
+  "try": 0,
+  "steps": 430,
+  "task": "put both the alphabet soup and the tomato sauce in the basket",
+  "suite": "libero_10",
+  "task_id": 0,
+  "video": "/home/czx/RoboLWM/runs/long1/libero_10_0/artifacts/tries/000/video.mp4"
+}

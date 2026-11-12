@@ -1,0 +1,16 @@
+{
+  "stage": "eval1",
+  "suite": "libero_object",
+  "task_id": 0,
+  "task": "pick up the alphabet soup and place it in the basket",
+  "started": 1794473894.5918515,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 4,
+  "cost": 0.0,
+  "tries": 1,
+  "steps_last_try": 181,
+  "video": "/home/czx/RoboLWM/runs/eval1/libero_object_0/artifacts/tries/000/video.mp4",
+  "duration_s": 274.1
+}

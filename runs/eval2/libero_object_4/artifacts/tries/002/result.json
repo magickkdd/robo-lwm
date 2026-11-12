@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "try": 2,
+  "steps": 249,
+  "task": "pick up the ketchup and place it in the basket",
+  "suite": "libero_object",
+  "task_id": 4,
+  "video": "/home/czx/RoboLWM/runs/eval2/libero_object_4/artifacts/tries/002/video.mp4"
+}

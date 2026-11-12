@@ -1,0 +1,16 @@
+{
+  "stage": "long1",
+  "suite": "libero_10",
+  "task_id": 0,
+  "task": "put both the alphabet soup and the tomato sauce in the basket",
+  "started": 1794479471.6020112,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 4,
+  "cost": 0.0,
+  "tries": 3,
+  "steps_last_try": 390,
+  "video": "/home/czx/RoboLWM/runs/long1/libero_10_0/artifacts/tries/002/video.mp4",
+  "duration_s": 270.3
+}

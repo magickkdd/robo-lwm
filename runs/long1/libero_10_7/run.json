@@ -1,0 +1,16 @@
+{
+  "stage": "long1",
+  "suite": "libero_10",
+  "task_id": 7,
+  "task": "put both the alphabet soup and the cream cheese box in the basket",
+  "started": 1794484187.0357072,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 4,
+  "cost": 0.0,
+  "tries": 3,
+  "steps_last_try": 375,
+  "video": "/home/czx/RoboLWM/runs/long1/libero_10_7/artifacts/tries/002/video.mp4",
+  "duration_s": 283.3
+}

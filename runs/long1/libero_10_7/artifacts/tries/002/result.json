@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "try": 2,
+  "steps": 375,
+  "task": "put both the alphabet soup and the cream cheese box in the basket",
+  "suite": "libero_10",
+  "task_id": 7,
+  "video": "/home/czx/RoboLWM/runs/long1/libero_10_7/artifacts/tries/002/video.mp4"
+}

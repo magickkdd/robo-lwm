@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "try": 2,
+  "steps": 152,
+  "task": "pick up the salad dressing and place it in the basket",
+  "suite": "libero_object",
+  "task_id": 2,
+  "video": "/home/czx/RoboLWM/runs/eval1/libero_object_2/artifacts/tries/002/video.mp4"
+}

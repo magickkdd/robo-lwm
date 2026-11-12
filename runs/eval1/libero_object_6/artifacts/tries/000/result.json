@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "try": 0,
+  "steps": 166,
+  "task": "pick up the butter and place it in the basket",
+  "suite": "libero_object",
+  "task_id": 6,
+  "video": "/home/czx/RoboLWM/runs/eval1/libero_object_6/artifacts/tries/000/video.mp4"
+}

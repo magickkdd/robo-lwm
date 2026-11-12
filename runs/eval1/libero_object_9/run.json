@@ -1,0 +1,16 @@
+{
+  "stage": "eval1",
+  "suite": "libero_object",
+  "task_id": 9,
+  "task": "pick up the orange juice and place it in the basket",
+  "started": 1794475376.0241714,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 6,
+  "cost": 0.0,
+  "tries": 2,
+  "steps_last_try": 174,
+  "video": "/home/czx/RoboLWM/runs/eval1/libero_object_9/artifacts/tries/001/video.mp4",
+  "duration_s": 196.3
+}

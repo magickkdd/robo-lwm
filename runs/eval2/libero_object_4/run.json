@@ -1,0 +1,16 @@
+{
+  "stage": "eval2",
+  "suite": "libero_object",
+  "task_id": 4,
+  "task": "pick up the ketchup and place it in the basket",
+  "started": 1794477838.924979,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 5,
+  "cost": 0.0,
+  "tries": 3,
+  "steps_last_try": 249,
+  "video": "/home/czx/RoboLWM/runs/eval2/libero_object_4/artifacts/tries/002/video.mp4",
+  "duration_s": 131.4
+}

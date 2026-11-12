@@ -1,0 +1,17 @@
+{
+  "stage": "lwm_chain",
+  "suite": "libero_object",
+  "task_id": 1,
+  "task": "pick up the cream cheese and place it in the basket",
+  "started": 1794494781.066371,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 6,
+  "cost": 0.0,
+  "tries": 1,
+  "lwm_reviews": 2,
+  "steps_last_try": 157,
+  "video": "/home/czx/RoboLWM/runs/lwm_chain/libero_object_1/artifacts/tries/000/video.mp4",
+  "duration_s": 189.2
+}

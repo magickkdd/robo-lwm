@@ -1,0 +1,16 @@
+{
+  "stage": "eval1",
+  "suite": "libero_object",
+  "task_id": 7,
+  "task": "pick up the milk and place it in the basket",
+  "started": 1794475206.6292038,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 3,
+  "cost": 0.0,
+  "tries": 1,
+  "steps_last_try": 169,
+  "video": "/home/czx/RoboLWM/runs/eval1/libero_object_7/artifacts/tries/000/video.mp4",
+  "duration_s": 83.9
+}

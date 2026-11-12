@@ -1,0 +1,9 @@
+{
+  "success": false,
+  "try": 3,
+  "steps": 500,
+  "task": "put both the cream cheese box and the butter in the basket",
+  "suite": "libero_10",
+  "task_id": 1,
+  "video": "/home/czx/RoboLWM/runs/long1/libero_10_1/artifacts/tries/003/video.mp4"
+}

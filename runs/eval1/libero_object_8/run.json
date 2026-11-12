@@ -1,0 +1,16 @@
+{
+  "stage": "eval1",
+  "suite": "libero_object",
+  "task_id": 8,
+  "task": "pick up the chocolate pudding and place it in the basket",
+  "started": 1794475292.3086886,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 4,
+  "cost": 0.0,
+  "tries": 1,
+  "steps_last_try": 156,
+  "video": "/home/czx/RoboLWM/runs/eval1/libero_object_8/artifacts/tries/000/video.mp4",
+  "duration_s": 81.9
+}

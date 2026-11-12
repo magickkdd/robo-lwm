@@ -1,0 +1,16 @@
+{
+  "stage": "long1",
+  "suite": "libero_10",
+  "task_id": 1,
+  "task": "put both the cream cheese box and the butter in the basket",
+  "started": 1794479744.3767078,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 8,
+  "cost": 0.0,
+  "tries": 6,
+  "steps_last_try": 500,
+  "video": "/home/czx/RoboLWM/runs/long1/libero_10_1/artifacts/tries/005/video.mp4",
+  "duration_s": 731.9
+}

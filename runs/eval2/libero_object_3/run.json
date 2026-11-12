@@ -1,0 +1,16 @@
+{
+  "stage": "eval2",
+  "suite": "libero_object",
+  "task_id": 3,
+  "task": "pick up the bbq sauce and place it in the basket",
+  "started": 1794477764.380034,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 3,
+  "cost": 0.0,
+  "tries": 1,
+  "steps_last_try": 175,
+  "video": "/home/czx/RoboLWM/runs/eval2/libero_object_3/artifacts/tries/000/video.mp4",
+  "duration_s": 72.0
+}
