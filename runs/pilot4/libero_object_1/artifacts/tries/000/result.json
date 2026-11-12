@@ -1,0 +1,9 @@
+{
+  "success": true,
+  "try": 0,
+  "steps": 157,
+  "task": "pick up the cream cheese and place it in the basket",
+  "suite": "libero_object",
+  "task_id": 1,
+  "video": "/home/czx/RoboLWM/runs/pilot4/libero_object_1/artifacts/tries/000/video.mp4"
+}

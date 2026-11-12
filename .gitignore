@@ -1,0 +1,13 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.vscode/
+.claude/
+.cursor/rules/_*
+runs/
+patch.txt
+exit_statuses*.yaml

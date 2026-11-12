@@ -1,0 +1,16 @@
+{
+  "stage": "pilot4",
+  "suite": "libero_object",
+  "task_id": 1,
+  "task": "pick up the cream cheese and place it in the basket",
+  "started": 1794456445.3908262,
+  "status": "done",
+  "success": true,
+  "exit_status": "Submitted",
+  "api_calls": 4,
+  "cost": 0.0,
+  "tries": 1,
+  "steps_last_try": 157,
+  "video": "/home/czx/RoboLWM/runs/pilot4/libero_object_1/artifacts/tries/000/video.mp4",
+  "duration_s": 119.4
+}

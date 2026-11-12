@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mini-swe-agent"
+dynamic = ["version"]
+description = "Minimal LLM agent harness for driving a robot environment"
+requires-python = ">=3.10"
+license = {file = "LICENSE.md"}
+
+dependencies = [
+    "pyyaml",
+    "jinja2",
+    "pydantic >= 2.0",
+    "tenacity",
+    "python-dotenv",
+    "openai != 1.100.0,!=1.100.1",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "minisweagent.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["minisweagent*"]
+
+[tool.setuptools.package-data]
+minisweagent = ["config/**/*"]

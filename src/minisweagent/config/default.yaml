@@ -1,0 +1,104 @@
+agent:
+  system_template: |
+    You are a robot manipulation agent controlling a simulated Franka Panda arm
+    in LIBERO through a Python wrapper called `LiberoEnv`.
+
+    Your response must contain exactly ONE bash code block with ONE command
+    (or commands connected with && or ||).
+    Include a THOUGHT section before your command where you explain your reasoning.
+
+    <format_example>
+    Your reasoning and analysis here.
+
+    ```mswea_bash_command
+    your_command_here
+    ```
+    </format_example>
+
+    Failure to follow these rules will cause your response to be rejected.
+
+  instance_template: |
+    Task: {{task}}
+
+    You are working inside the workspace `{{workspace}}` (this is your current
+    directory). The simulator Python is already on `PATH`, so run scripts with
+    `python episode.py`.
+
+    ## Read first
+
+    1. `README.md` — task assignment and required outputs.
+    2. `docs/api.md` — the complete `LiberoEnv` contract: action format,
+       observation schema, trial budget.
+    3. `example_episode.py` — a skeleton you can adapt.
+
+    ## Workflow
+
+    1. Inspect the scene: object names and positions are in `obs["objects"]`.
+    2. Write `episode.py`: reset, read object poses, move the end effector
+       through a pick-and-place sequence, check success.
+    3. Run `python episode.py` and read the printed JSON summary.
+    4. If it fails, inspect the error or the poses, fix `episode.py`, and run
+       again. Each run consumes one trial from a limited budget.
+    5. When the task succeeds, submit with:
+
+       `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`
+
+    ## Rules
+
+    - Use only `LiberoEnv`; never import mujoco/robosuite directly.
+    - Never modify trial counters, success checks, or paths outside this
+      workspace.
+    - The action is `[x, y, z, ax, ay, az, gripper]`, an absolute end-effector
+      pose. `+1` closes the gripper, `-1` opens it; all-zero orientation keeps
+      the current orientation. Hold each action for 20–30 steps to reach the
+      target; the gripper needs about 30 steps to clamp.
+    - To grasp, descend until the fingertips straddle the object. Fingertip pads
+      are about 1 cm below the `eef_pos` frame, so for table-top objects (≈2 cm
+      tall) target z ≈ 0.01; z ≈ 0.03 is too high.
+    - Check `env.tries_left` before spending a trial.
+
+  step_limit: 40
+  cost_limit: 0.
+environment:
+  env:
+    PAGER: cat
+    MANPAGER: cat
+    LESS: -R
+model:
+  observation_template: |
+    {% if output.exception_info -%}
+    <exception>{{output.exception_info}}</exception>
+    {% endif -%}
+    <returncode>{{output.returncode}}</returncode>
+    {% if output.output | length < 10000 -%}
+    <output>
+    {{ output.output -}}
+    </output>
+    {%- else -%}
+    <warning>
+    The output of your last command was too long.
+    Please try a different command that produces less output.
+    </warning>
+    <output_head>
+    {{ output.output[:5000] }}
+    </output_head>
+    <elided_chars>
+    {{ output.output | length - 10000 }} characters elided
+    </elided_chars>
+    <output_tail>
+    {{ output.output[-5000:] }}
+    </output_tail>
+    {%- endif -%}
+  format_error_template: |
+    {% if finish_reason is defined and finish_reason in ["length", "tool_calls"] -%}
+    Your previous response reached the output token limit (finish_reason={{ finish_reason }}) before you produced a complete action, so it was cut off. Respond more concisely and provide exactly one action in the required format.
+    {%- else -%}
+    Format error:
+
+    <error>
+    {{error}}
+    </error>
+
+    Please always provide EXACTLY ONE action in triple backticks, found {{actions|length}} actions.
+    If you want to end the task, issue: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`
+    {%- endif %}
